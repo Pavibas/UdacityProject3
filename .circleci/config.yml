@@ -10,6 +10,18 @@ commands:
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
+
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+
 jobs:
   build-frontend:
     docker:
@@ -140,6 +152,25 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
 
+  configure-infrastructure:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - install_awscli
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints:
+            - "bb:f9:52:ad:64:85:25:43:86:33:5d:28:dd:1b:5b:f0"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Configure Server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+
 workflows:
   default:
     jobs:
@@ -158,3 +189,5 @@ workflows:
           filters:
             branches:
               only: [main]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
