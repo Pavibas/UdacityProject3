@@ -4,6 +4,7 @@ import { AboutInfo } from './about.interface';
 import { Product } from '../../modules/domain/orders/entities/product.entity';
 import { Order } from '../../modules/domain/orders/entities/order.entity';
 import { Employee } from '../domain/employees/entities/employee.entity';
+import * as fs from "fs";
 
 export interface EnvConfig {
   VERSION: string;
@@ -108,12 +109,11 @@ export class ConfigService {
       extra: {
         max: 4,
         min: 1,
-        ssl: {
-          rejectUnauthorized: false,
-        },
       },
       synchronize: false,
-      ssl: true,
+      ssl: {
+        ca: fs.readFileSync('us-east-1-bundle.pem').toString(),
+      },
     };
   }
 
