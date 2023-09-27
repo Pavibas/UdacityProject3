@@ -105,7 +105,13 @@ export class ConfigService {
       entities: [this.envConfig.TYPEORM_ENTITIES],
       // entities: [Product, Order, Employee],
       logging: this.envConfig.TYPEORM_LOGGING === 'true',
-      extra: { max: 4, min: 1 },
+      extra: {
+        max: 4,
+        min: 1,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      },
       synchronize: false,
       ssl: true,
     };
