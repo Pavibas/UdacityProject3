@@ -57,7 +57,6 @@ export class ConfigService {
     }).unknown();
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(envConfig);
 
-
     if (error) {
       throw new Error(`Config validation error: ${error.message}`);
     }
@@ -108,6 +107,7 @@ export class ConfigService {
       logging: this.envConfig.TYPEORM_LOGGING === 'true',
       extra: { max: 4, min: 1 },
       synchronize: false,
+      ssl: true,
     };
   }
 
