@@ -1,9 +1,9 @@
 import * as Joi from '@hapi/joi';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AboutInfo } from './about.interface';
-import { Order } from '../domain/orders/entities/order.entity';
+import { Product } from '../../modules/domain/orders/entities/product.entity';
+import { Order } from '../../modules/domain/orders/entities/order.entity';
 import { Employee } from '../domain/employees/entities/employee.entity';
-import * as fs from 'fs';
 
 export interface EnvConfig {
   VERSION: string;
@@ -41,6 +41,7 @@ export class ConfigService {
       BACKEND_PORT: Joi.number().default(3030),
       LOGGLY_SUBDOMAIN: Joi.string(),
       LOGGLY_TOKEN: Joi.string(),
+      TYPEORM_ENTITIES: Joi.string().required(),
       TYPEORM_USERNAME: Joi.string().required(),
       TYPEORM_PASSWORD: Joi.string().required(),
       TYPEORM_DATABASE: Joi.string().required(),
@@ -55,6 +56,7 @@ export class ConfigService {
       // AUTH0_AUDIENCE: Joi.string().required(),
     }).unknown();
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(envConfig);
+
 
     if (error) {
       throw new Error(`Config validation error: ${error.message}`);
@@ -101,17 +103,11 @@ export class ConfigService {
       username: this.envConfig.TYPEORM_USERNAME,
       password: this.envConfig.TYPEORM_PASSWORD,
       database: this.envConfig.TYPEORM_DATABASE,
-      // entities: [this.envConfig.TYPEORM_ENTITIES],
-      entities: [Order, Employee],
+      entities: [this.envConfig.TYPEORM_ENTITIES],
+      // entities: [Product, Order, Employee],
       logging: this.envConfig.TYPEORM_LOGGING === 'true',
-      extra: {
-        max: 4,
-        min: 1,
-      },
+      extra: { max: 4, min: 1 },
       synchronize: false,
-      ssl: {
-        ca: fs.readFileSync('us-east-1-bundle.pem').toString(),
-      },
     };
   }
 
