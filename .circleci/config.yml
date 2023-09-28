@@ -1,17 +1,6 @@
 version: 2.1
 
-orbs:
-  
-  slack: circleci/slack@4.10.1
-
 commands:
-
-  slack_notifcation:
-    steps:
-      - slack/notify:
-          event: fail
-          channel: ci-cd
-          template: basic_fail_1
 
   install_awscli:
     steps:
@@ -31,10 +20,10 @@ commands:
             sudo apt install ansible
 
   install_nodejs:
-    description: Install Node.js 
+    description: Install Node.js
     steps:
       - run:
-          name: Install Node.js 
+          name: Install Node.js
           command: |
             curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
             sudo apt install -y nodejs
@@ -44,7 +33,7 @@ commands:
     parameters:
       workflow_ID:
         type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}   
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Destroy environments
@@ -59,14 +48,14 @@ commands:
     parameters:
       workflow_ID:
         type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}  
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Revert migrations
-          when: on_fail 
+          when: on_fail
           command: |
           
-            SUCCESS=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/migration_<< parameters.workflow_ID >>)
+            SUCCESS=$(curl --insecure https://kvdb.io/JaNS7yE2XcWLry9nmvQzPr/migration_<< parameters.workflow_ID >>)
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -91,8 +80,7 @@ jobs:
             npm run build
       - save_cache:
           paths: [frontend/node_modules]
-          key: frontend-dependencies 
-      - slack_notifcation
+          key: frontend-dependencies
 
   build-backend:
     docker:
@@ -111,7 +99,6 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-dependencies
-      - slack_notifcation             
 
   test-frontend:
     docker:
@@ -126,7 +113,6 @@ jobs:
             cd frontend
             npm install
             npm run test
-      - slack_notifcation            
 
   test-backend:
     docker:
@@ -141,7 +127,6 @@ jobs:
             cd backend
             npm install
             npm run test
-      - slack_notifcation            
 
   scan-frontend:
     docker:
@@ -158,7 +143,6 @@ jobs:
             npm audit fix --force --audit-level=critical
             npm audit fix --force --audit-level=critical
             npm audit --audit-level=critical
-      - slack_notifcation
 
   scan-backend:
     docker:
@@ -174,8 +158,7 @@ jobs:
              npm install
              npm audit fix --force --audit-level=critical
              npm audit fix --force --audit-level=critical
-             npm audit --audit-level=critical 
-      - slack_notifcation
+             npm audit --audit-level=critical
 
   deploy-infrastructure:
     docker:
@@ -190,7 +173,7 @@ jobs:
               --tags project=udapeople \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-              
+
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -199,7 +182,7 @@ jobs:
               --tags project=udapeople \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-              
+
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -210,14 +193,14 @@ jobs:
 
             echo $BACKEND_PUBLIC_IP >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
-      
-      - run: yum -y install tar gzip     
-      - persist_to_workspace: 
+
+      - run: yum -y install tar gzip
+      - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
 
-      - destroy-environment 
+      - destroy-environment
 
   add-prometheus-node-exporter:
     docker:
@@ -226,7 +209,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - '69:2d:56:e2:d1:20:28:c4:3d:f6:3c:6b:63:21:ba:0d'
+            - 'bb:f9:52:ad:64:85:25:43:86:33:5d:28:dd:1b:5b:f0'
       - run:
           name: Install dependencies
           command: |
@@ -249,8 +232,8 @@ jobs:
       - install_awscli
       - install_ansible
       - add_ssh_keys:
-          fingerprints: ["69:2d:56:e2:d1:20:28:c4:3d:f6:3c:6b:63:21:ba:0d"]
-      
+          - 'bb:f9:52:ad:64:85:25:43:86:33:5d:28:dd:1b:5b:f0'
+
       - attach_workspace:
           at: ~/
 
@@ -275,7 +258,7 @@ jobs:
           root: ~/
           paths:
             - project/backend
-      - destroy-environment 
+      - destroy-environment
 
   run-migrations:
     docker:
@@ -286,7 +269,7 @@ jobs:
 
       - attach_workspace:
           at: ~/
-      
+
       - restore_cache:
           keys: [backend-dependencies]
       - run:
@@ -301,7 +284,7 @@ jobs:
             cat ~/project/backend/migrations_dump.txt
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-              curl https://kvdb.io/${KVDB_BUCKET}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+              curl https://kvdb.io/JaNS7yE2XcWLry9nmvQzPr/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy-environment
       - revert-migrations
@@ -337,7 +320,7 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}  --recursive
 
       - destroy-environment
-      - revert-migrations 
+      - revert-migrations
 
   deploy-backend:
     docker:
@@ -348,14 +331,14 @@ jobs:
       - install_ansible
       - install_nodejs
       - add_ssh_keys:
-          fingerprints: ["69:2d:56:e2:d1:20:28:c4:3d:f6:3c:6b:63:21:ba:0d"]
-      
+          - 'bb:f9:52:ad:64:85:25:43:86:33:5d:28:dd:1b:5b:f0'
+
       - attach_workspace:
           at: ~/
-      
+
       - restore_cache:
           keys: [backend-dependencies]
-      
+
       - run:
           name: Install dependencies
           command: |
@@ -372,7 +355,7 @@ jobs:
             tar -C backend -czvf artifact.tar.gz .
             mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
             mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
-            
+
       - run:
           name: deploy backend
           command: |
@@ -380,13 +363,13 @@ jobs:
             export TYPEORM_ENTITIES=./src/modules/**/*.entity.ts
             export TYPEORM_MIGRATIONS=./src/migrations/*.ts
 
-            curl https://kvdb.io/${KVDB_BUCKET}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            curl https://kvdb.io/JaNS7yE2XcWLry9nmvQzPr/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
- 
-      #- destroy-environment    
+
+      #- destroy-environment
       #- revert-migrations
 
   smoke-test:
@@ -395,7 +378,7 @@ jobs:
     steps:
       - checkout
       - install_awscli
-            
+
       - run:
           name: Frontend smoke test.
           command: |
@@ -425,7 +408,7 @@ jobs:
               exit 1
             fi 
 
-      - destroy-environment    
+      - destroy-environment
       - revert-migrations
 
   cloudfront-update:
@@ -434,7 +417,7 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      
+
       - run:
           name: Save Old Workflow ID to kvdb.io
           command: |
@@ -443,8 +426,8 @@ jobs:
               --no-paginate --output text)
 
             echo "Old Workflow ID:"$OLD_WORKFLOW_ID"
-            curl https://kvdb.io/${KVDB_BUCKET}/old_workflow_id -d "${OLD_WORKFLOW_ID}""
-            
+            curl https://kvdb.io/JaNS7yE2XcWLry9nmvQzPr/old_workflow_id -d "${OLD_WORKFLOW_ID}""
+
       - run:
           name: Update cloudfront distribution
           command: |
@@ -453,8 +436,8 @@ jobs:
               --stack-name "InitialStack" \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" 
 
-      - destroy-environment    
-      - revert-migrations 
+      - destroy-environment
+      - revert-migrations
 
   cleanup:
     docker:
@@ -486,33 +469,33 @@ workflows:
     jobs:
       - build-frontend
       - build-backend
-      #- test-frontend:
-      #    requires: [build-frontend]
-      #- test-backend:
-      #    requires: [build-backend]
-      #- scan-backend:
-      #    requires: [build-backend]
-      #- scan-frontend:
-      #    requires: [build-frontend]
-      #- deploy-infrastructure:
-      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #    filters:
-      #      branches:
-      #        only: [main]
-      #- configure-infrastructure:
-      #    requires: [deploy-infrastructure]
-      #- add-prometheus-node-exporter:
-      #    requires: [configure-infrastructure]
-      #- run-migrations:
-      #    requires: [add-prometheus-node-exporter]
-      #- deploy-frontend:
-      #    requires: [run-migrations]
-      #- deploy-backend:
-      #    requires: [run-migrations]
-      #- smoke-test:
-      #    requires: [deploy-backend, deploy-frontend]
-      #- cloudfront-update:
-      #    requires: [smoke-test]
-      #- cleanup:
-      #    requires: [cloudfront-update]      
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [main]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - add-prometheus-node-exporter:
+          requires: [configure-infrastructure]
+      - run-migrations:
+          requires: [add-prometheus-node-exporter]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
 
