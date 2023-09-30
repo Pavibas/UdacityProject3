@@ -1,8 +1,6 @@
 import * as Joi from '@hapi/joi';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AboutInfo } from './about.interface';
-import { Order } from '../domain/orders/entities/order.entity';
-import { Employee } from '../domain/employees/entities/employee.entity';
 import * as fs from 'fs';
 
 export interface EnvConfig {
@@ -41,6 +39,7 @@ export class ConfigService {
       BACKEND_PORT: Joi.number().default(3030),
       LOGGLY_SUBDOMAIN: Joi.string(),
       LOGGLY_TOKEN: Joi.string(),
+      TYPEORM_ENTITIES: Joi.string().required(),
       TYPEORM_USERNAME: Joi.string().required(),
       TYPEORM_PASSWORD: Joi.string().required(),
       TYPEORM_DATABASE: Joi.string().required(),
@@ -101,8 +100,7 @@ export class ConfigService {
       username: this.envConfig.TYPEORM_USERNAME,
       password: this.envConfig.TYPEORM_PASSWORD,
       database: this.envConfig.TYPEORM_DATABASE,
-      // entities: [this.envConfig.TYPEORM_ENTITIES],
-      entities: [Order, Employee],
+      entities: [this.envConfig.TYPEORM_ENTITIES],
       logging: this.envConfig.TYPEORM_LOGGING === 'true',
       extra: {
         max: 4,
