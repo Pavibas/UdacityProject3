@@ -4,7 +4,7 @@ import { AboutInfo } from './about.interface';
 import { Product } from '../../modules/domain/orders/entities/product.entity';
 import { Order } from '../../modules/domain/orders/entities/order.entity';
 import { Employee } from '../domain/employees/entities/employee.entity';
-import * as fs from 'fs';
+import * as fs from "fs";
 
 export interface EnvConfig {
   VERSION: string;
@@ -58,7 +58,6 @@ export class ConfigService {
     }).unknown();
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(envConfig);
 
-
     if (error) {
       throw new Error(`Config validation error: ${error.message}`);
     }
@@ -107,7 +106,10 @@ export class ConfigService {
       entities: [this.envConfig.TYPEORM_ENTITIES],
       // entities: [Product, Order, Employee],
       logging: this.envConfig.TYPEORM_LOGGING === 'true',
-      extra: { max: 4, min: 1 },
+      extra: {
+        max: 4,
+        min: 1,
+      },
       synchronize: false,
       ssl: {
         ca: fs.readFileSync('us-east-1-bundle.pem').toString(),
