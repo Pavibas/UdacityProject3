@@ -111,9 +111,6 @@ export class ConfigService {
         min: 1,
       },
       synchronize: false,
-      ssl: {
-        ca: fs.readFileSync('us-east-1-bundle.pem').toString(),
-      },
     };
   }
 
