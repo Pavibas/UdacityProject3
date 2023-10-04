@@ -1,0 +1,3 @@
+[URL01] https://github.com/Pavibas/UdacityProject3.git
+[URL02] http://udapeople-b349c5b.s3-website-us-east-1.amazonaws.com/index.html#/employees
+[URL03] https://dzwb4g2lg682r.cloudfront.net/#/employees
